@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\GarageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,6 +43,21 @@ class Garage
      * @ORM\Column(type="integer")
      */
     private $garagePhone;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Vehicule::class, mappedBy="garage")
+     */
+    private $vehicules;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=professionnal::class, inversedBy="garages")
+     */
+    private $professionnal;
+
+    public function __construct()
+    {
+        $this->vehicules = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +120,48 @@ class Garage
     public function setGaragePhone(int $garagePhone): self
     {
         $this->garagePhone = $garagePhone;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Vehicule[]
+     */
+    public function getVehicules(): Collection
+    {
+        return $this->vehicules;
+    }
+
+    public function addVehicule(Vehicule $vehicule): self
+    {
+        if (!$this->vehicules->contains($vehicule)) {
+            $this->vehicules[] = $vehicule;
+            $vehicule->setGarage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVehicule(Vehicule $vehicule): self
+    {
+        if ($this->vehicules->removeElement($vehicule)) {
+            // set the owning side to null (unless already changed)
+            if ($vehicule->getGarage() === $this) {
+                $vehicule->setGarage(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getProfessionnal(): ?professionnal
+    {
+        return $this->professionnal;
+    }
+
+    public function setProfessionnal(?professionnal $professionnal): self
+    {
+        $this->professionnal = $professionnal;
 
         return $this;
     }

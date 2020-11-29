@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ProfessionnalRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -46,6 +48,16 @@ class Professionnal
      * @ORM\Column(type="boolean")
      */
     private $accountValid;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Garage::class, mappedBy="professionnal")
+     */
+    private $garages;
+
+    public function __construct()
+    {
+        $this->garages = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -120,6 +132,36 @@ class Professionnal
     public function setAccountValid(bool $accountValid): self
     {
         $this->accountValid = $accountValid;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Garage[]
+     */
+    public function getGarages(): Collection
+    {
+        return $this->garages;
+    }
+
+    public function addGarage(Garage $garage): self
+    {
+        if (!$this->garages->contains($garage)) {
+            $this->garages[] = $garage;
+            $garage->setProfessionnal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGarage(Garage $garage): self
+    {
+        if ($this->garages->removeElement($garage)) {
+            // set the owning side to null (unless already changed)
+            if ($garage->getProfessionnal() === $this) {
+                $garage->setProfessionnal(null);
+            }
+        }
 
         return $this;
     }
